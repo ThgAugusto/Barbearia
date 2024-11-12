@@ -6,11 +6,11 @@ const Sidebar = () => {
   const location = useLocation();
   
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: Calendar, label: 'Agendamentos', path: '/appointments' },
-    { icon: Users, label: 'Clientes', path: '/clients' },
-    { icon: Scissors, label: 'Serviços', path: '/services' },
-    { icon: Clock, label: 'Histórico', path: '/history' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },  
+    { icon: Calendar, label: 'Agendamentos', path: '/dashboard/appointments' },
+    { icon: Users, label: 'Clientes', path: '/dashboard/clients' },
+    { icon: Scissors, label: 'Serviços', path: '/dashboard/services' },
+    { icon: Clock, label: 'Histórico', path: '/dashboard/history' },
   ];
 
   return (

@@ -12,3 +12,50 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Client {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(100)
+  phone       String       @db.VarChar(15)
+  email       String?      @db.VarChar(100)
+  notes       String?
+  schedulings Scheduling[]
+}
+
+model Service {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(100)
+  price       Decimal      @db.Money
+  duration    Int
+  description String?
+  schedulings Scheduling[]
+}
+
+model Barber {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(100)
+  avatar      String?      @db.Text
+  email       String       @unique
+  password    String
+  schedulings Scheduling[]
+}
+
+model Scheduling {
+  id            Int      @id @default(autoincrement())
+  clientId      Int?
+  client        Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  barberId      Int?
+  barber        Barber?  @relation(fields: [barberId], references: [id], onDelete: SetNull)
+  serviceId     Int?
+  service       Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  scheduledDate DateTime
+  status        Status   @default(SCHEDULED) 
+  notes         String?
+}
+
+enum Status {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+

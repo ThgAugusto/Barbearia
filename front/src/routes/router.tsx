@@ -1,9 +1,10 @@
 import { createBrowserRouter, redirect } from "react-router-dom";
 import Dashboard from "../pages/dashboard";
-import ClientList from '../pages/dashboard/components/ClientList';
-import AppointmentCalendar from "../pages/dashboard/components/AppointmentCalendar";
-import ServiceList from "../pages/dashboard/components/ServiceList";
-import Overview from "../pages/dashboard/components/Overview";
+import ClientList from '../pages/dashboard/content/ClientList';
+import SchedulingCalendar from "../pages/dashboard/content/SchedulingCalendar";
+import ServiceList from "../pages/dashboard/content/ServiceList";
+import Overview from "../pages/dashboard/content/Overview";
+import Login from "../pages/auth/login";
 
 export const Router = createBrowserRouter([
   {
@@ -11,29 +12,33 @@ export const Router = createBrowserRouter([
     loader: () => redirect("/dashboard"),
   },
   {
+    path: "/login",
+    element: <Login />,
+  },
+  {
     path: "/dashboard",
     element: <Dashboard />,
     children: [
       {
-        path:"",
+        path: "overview",
         element: <Overview />,
       },
       {
-      path: "appointments", 
-      element: <AppointmentCalendar />,
-    },
-    {
-      path: "services", 
-      element: <ServiceList />,
-    },
-    {
-      path: "clients", 
-      element: <ClientList />,
-    },
-    {
-      path: "history", 
-      element: <ClientList />,
-    },
-  ]
+        path: "scheduling",
+        element: <SchedulingCalendar />,
+      },
+      {
+        path: "services",
+        element: <ServiceList />,
+      },
+      {
+        path: "clients",
+        element: <ClientList />,
+      },
+      {
+        path: "history",
+        element: <ClientList />,
+      },
+    ]
   }
 ]);

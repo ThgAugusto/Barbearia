@@ -1,4 +1,4 @@
-import AppointmentCalendar from '../components/AppointmentCalendar';
+import AppointmentCalendar from './SchedulingCalendar';
 
 export default function Overview() {
     return (

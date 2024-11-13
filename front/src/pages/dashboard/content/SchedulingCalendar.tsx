@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar as CalendarIcon, Clock, User } from 'lucide-react';
 
-const AppointmentCalendar = () => {
+const SchedulingCalendar = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
@@ -48,4 +48,4 @@ const AppointmentCalendar = () => {
   );
 };
 
-export default AppointmentCalendar;
+export default SchedulingCalendar;

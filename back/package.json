@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev":  "tsx watch src/sever.ts"
+    "dev": "tsx watch src/sever.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,8 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
-    "@prisma/client": "^5.16.1"
+    "@prisma/client": "^5.16.1",
+    "argon2": "^0.41.1",
+    "fastify": "^5.1.0"
   }
 }

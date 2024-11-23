@@ -1,11 +1,18 @@
-import Fastify from 'fastify';
-import { barberRoutes } from './routes/barberRoutes';
+import 'reflect-metadata'; 
+import { FastifyServer } from './core/sever/fastify-sever';
 
-const app = Fastify();
+async function startServer(): Promise<void> {
+    const fastifyServer = new FastifyServer(); 
+    await fastifyServer.configure();  
+    const port = Number(process.env.PORT) || 3000;
 
-app.register(barberRoutes);
+    try {
+        await fastifyServer.start(); 
+        console.log(`Servidor rodando em http://localhost:${port}`);
+    } catch (err) {
+        console.error('Erro ao iniciar o servidor:', err);
+        process.exit(1);
+    }
+}
 
-app.listen({ port: 3000 }, (err, address) => {
-  if (err) throw err;
-  console.log(`Server is running at ${address}`);
-});
+startServer();

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,13 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Client {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(100)
-  phone       String       @db.VarChar(15)
-  email       String?      @db.VarChar(100)
-  notes       String?
-  schedulings Scheduling[]
+enum Role {
+  OWNER
+  BARBER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum SchedulingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                   Int          @id @default(autoincrement())
+  name                 String       @db.VarChar(100)
+  email                String       @unique @db.VarChar(255)
+  password             String       @db.VarChar(255)
+  role                 Role
+  barbershopId         Int?
+  barbershop           Barbershop?  @relation("BarbershopBarbers", fields: [barbershopId], references: [id], onDelete: SetNull)
+  barbershopScheduling Scheduling[]
+  ownedBarbershop      Barbershop?  @relation("BarbershopOwner")
+  status               Status       @default(ACTIVE)
+
+  @@index([role])
+}
+
+model Barbershop {
+  id           Int          @id @default(autoincrement())
+  socialReason String       @db.VarChar(255)
+  tradeName    String?      @db.VarChar(255)
+  cnpj         String       @unique @db.VarChar(18)
+  address      String       @db.VarChar(255)
+  phoneNumber  String       @db.VarChar(15)
+  ownerId      Int?         @unique
+  owner        User?        @relation("BarbershopOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  barber       User[]       @relation("BarbershopBarbers")
+  scheduling   Scheduling[]
+  status       Status       @default(ACTIVE)
+
+  @@index([socialReason])
+  @@index([tradeName])
 }
 
 model Service {
@@ -27,35 +60,35 @@ model Service {
   name        String       @db.VarChar(100)
   price       Decimal      @db.Money
   duration    Int
-  description String?
+  description String?      @db.Text
   schedulings Scheduling[]
+  status      Status       @default(ACTIVE)
 }
 
-model Barber {
+model Client {
   id          Int          @id @default(autoincrement())
   name        String       @db.VarChar(100)
-  avatar      String?      @db.Text
-  email       String       @unique
-  password    String
+  phone       String       @db.VarChar(15)
+  email       String?      @db.VarChar(100)
+  notes       String?
   schedulings Scheduling[]
+  status      Status       @default(ACTIVE)
 }
 
 model Scheduling {
-  id            Int      @id @default(autoincrement())
-  clientId      Int?
-  client        Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  barberId      Int?
-  barber        Barber?  @relation(fields: [barberId], references: [id], onDelete: SetNull)
-  serviceId     Int?
-  service       Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  scheduledDate DateTime
-  status        Status   @default(SCHEDULED) 
-  notes         String?
-}
+  id           Int              @id @default(autoincrement())
+  dateTime     DateTime
+  notes        String?          @db.Text
+  barberId     Int
+  barbershopId Int
+  status       SchedulingStatus @default(SCHEDULED)
+  barbershop   Barbershop       @relation(fields: [barbershopId], references: [id])
+  barber       User             @relation(fields: [barberId], references: [id])
+  serviceId    Int
+  service      Service          @relation(fields: [serviceId], references: [id])
+  clientId     Int
+  client       Client           @relation(fields: [clientId], references: [id])
 
-enum Status {
-  SCHEDULED
-  COMPLETED
-  CANCELLED
+  @@index([barberId, dateTime])
+  @@index([barbershopId, dateTime])
 }
-

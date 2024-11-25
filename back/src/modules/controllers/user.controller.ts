@@ -28,8 +28,8 @@ export class UserController {
         reply.status(200).send(updatedUser);
     }
 
-    async delete(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
-        await this.userService.delete(Number(request.params.id));
+    async softDelete(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
+        await this.userService.softDelete(Number(request.params.id));
         reply.status(200).send({ message: 'Usuário deletado com sucesso' });
     }
 }

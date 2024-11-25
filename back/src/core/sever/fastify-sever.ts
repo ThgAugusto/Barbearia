@@ -1,5 +1,5 @@
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { Routes } from '../../routes/routes';  
+import { Routes } from '../../routes/index.routes';  
 import { setupPlugins } from '../plugins/plugins';
 import { ErrorHandler } from '../errors/error-handler';
 

@@ -35,10 +35,11 @@ export class UserRepository {
     });
   }
 
-  async delete(id: number): Promise<void> {
+  async softDelete(id: number): Promise<void> {
     await prisma.user.update({
       where: { id },
       data: { status: 'INACTIVE' }, 
     });
   }
+
 }

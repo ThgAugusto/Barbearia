@@ -2,14 +2,16 @@ import { CustomError } from "./custom.exception";
 import { ZodError } from 'zod';
 
 export class UserAlreadyExistsError extends CustomError {
-    constructor(message: string, details?: any) {
-        super(message, 409, details); 
+    constructor() {
+        const message = 'O e-mail informado já está associado a uma conta.';
+        super(message, 409); 
     }
 }
 
 export class UserNotFoundError extends CustomError {
-    constructor(message: string, details?: any) {
-        super(message, 404, details);  
+    constructor() {
+        const message = 'Não foi possível encontrar o usuário com o identificador fornecido.';
+        super(message, 404);  
     }
 }
 

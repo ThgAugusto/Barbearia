@@ -1,38 +1,32 @@
-import { Role, User } from '@prisma/client';
+import { Role, User, Status } from '@prisma/client';
 
-class UserDTO {
+export class UserDTO {
     id: number;
     name: string;
     email: string;
     password: string;
     role: Role;
     barbershopId?: number | null;
+    status: Status;
 
     constructor(user: User) {
-        this.id = user.id
-        this.name = user.name
-        this.email = user.email 
-        this.password = user.password
-        this.role = user.role 
-        this.barbershopId = user.barbershopId 
+        this.id = user.id;
+        this.name = user.name;
+        this.email = user.email;
+        this.password = user.password;
+        this.role = user.role;
+        this.barbershopId = user.barbershopId;
+        this.status = user.status;
+    }
+
+    toResponse() {
+        const { password, ...userResponse } = this;  
+        return userResponse;
     }
 }
 
-export class CreateUserDTO extends UserDTO {  
-    constructor(user:User) {
-        super(user);
-    }
-}
+export type CreateUserDTO = Omit<UserDTO, 'id' | 'status'>;
 
-export class UpdateUserDTO extends UserDTO {
-    constructor(user: Partial<User>) {
-        super(user as User);
-    }
-}
+export type UpdateUserDTO = Partial<Omit<UserDTO, 'id' | 'status'>>;
 
-export class UserResponseDTO extends UserDTO {
-    constructor(user: User) {
-        super(user);
-        delete (this as any).password;
-    }
-}
+export type UserResponseDTO = ReturnType<UserDTO['toResponse']>;

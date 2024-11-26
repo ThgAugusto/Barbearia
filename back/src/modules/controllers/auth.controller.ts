@@ -9,7 +9,8 @@ export class AuthController {
     constructor(@inject(AuthService) private readonly authService: AuthService) { }
 
     async authenticate(request: FastifyRequest<{ Body: AuthDTO }>, reply: FastifyReply): Promise<void> {
-        const token = await this.authService.authenticate(request.body);
+        const token = await this.authService.authenticate(request.body, reply);
         reply.status(200).send({ token });
     }
+
 }

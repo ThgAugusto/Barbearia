@@ -47,7 +47,7 @@ export class UserService {
     return new UserDTO(user).toResponse(); 
   }
 
-  async findAuthUserByEmail(email: string): Promise<UserResponseDTO> {
+  async findAuthUserByEmail(email: string): Promise<UserDTO> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new UserNotFoundError();

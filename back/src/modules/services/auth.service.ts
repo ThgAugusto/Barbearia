@@ -1,6 +1,6 @@
 import { inject, AutoRegister } from '../../utils/auto-register.decorator';
 import { UserService } from '../services/user.service';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import argon2 from 'argon2';
 import { authSchema } from '../validations/auth.validations';
 import { AuthValidationError, IncorrectPasswordError } from '../../exceptions/auth.exception';
@@ -13,7 +13,7 @@ export class AuthService {
         @inject('FastifyInstance') private readonly fastify: FastifyInstance
     ) { }
 
-    async authenticate(auth: AuthDTO): Promise<string> {
+    async authenticate(auth: AuthDTO, reply: FastifyReply): Promise<string> {
 
         const result = authSchema.safeParse(auth);
 
@@ -31,8 +31,17 @@ export class AuthService {
 
         const token = this.fastify.jwt.sign(
             { userId: user.id, name: user.name, email: user.email, role: user.role },
-            { expiresIn: '1h' }
+            { expiresIn: '7d' }
         );
+
+        reply.setCookie('token', token, {
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict', 
+            maxAge: 7 * 24 * 60 * 60 * 1000,  
+        });
+        
 
         return token;
     }

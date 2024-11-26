@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthSessionExpiredError, AuthInvalidCredentialsError, AuthUnauthorizedError } from '../../exceptions/auth.exception';
 
-
 export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
   try {
     request.auth = await request.jwtVerify();

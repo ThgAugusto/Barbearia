@@ -5,6 +5,9 @@ import SchedulingCalendar from "../pages/dashboard/content/SchedulingCalendar";
 import ServiceList from "../pages/dashboard/content/ServiceList";
 import Overview from "../pages/dashboard/content/Overview";
 import Login from "../pages/auth/login";
+import ProtectedRoute from "../components/ProtectedRoute";
+
+
 
 export const Router = createBrowserRouter([
   {
@@ -17,7 +20,11 @@ export const Router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "overview",

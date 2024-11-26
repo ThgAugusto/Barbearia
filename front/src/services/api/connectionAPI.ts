@@ -1,7 +1,8 @@
-import axios, { AxiosInstance } from "axios";
+import axios from 'axios';
 
-const ConnectionAPI: AxiosInstance = axios.create({
-    baseURL: "http://localhost:3000",
-})
+const ConnectionAPI = axios.create({
+    baseURL: 'http://localhost:3000/',
+    withCredentials: true,
+});
 
 export default ConnectionAPI;

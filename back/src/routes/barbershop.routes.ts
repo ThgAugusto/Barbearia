@@ -20,11 +20,12 @@ export class BarbershopRoutes {
                 return this.barbershopController.create(request, reply);
         });
 
-        this.fastify.get('/barbershops',
+        this.fastify.get('/owner/barbershops',
             { preHandler: authMiddleware },
             async (request, reply) => {
-                return this.barbershopController.findAll(request, reply);
+                return this.barbershopController.findAllByOwner(request, reply);
         });
+
 
         this.fastify.get<{ Params: { id: number } }>('/barbershops/:id',
             { preHandler: authMiddleware },
@@ -43,5 +44,9 @@ export class BarbershopRoutes {
             async (request, reply) => {
                 return this.barbershopController.softDelete(request, reply);
         });
+
+        this.fastify.patch<{ Params: { id: number } }>('/barbershops/:id/restore', async (request, reply) => {
+            return this.barbershopController.restore(request, reply);
+          });
     }
 }

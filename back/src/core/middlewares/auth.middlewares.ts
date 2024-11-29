@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { AuthSessionExpiredError, AuthInvalidCredentialsError, AuthUnauthorizedError } from '../../exceptions/auth.exception';
+import { AuthSessionExpiredError, AuthInvalidCredentialsError, AuthUnauthorizedError, AuthAlreadyLoggedInError } from '../../exceptions/auth.exception';
 
 export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -24,4 +24,17 @@ export function checkUserRole(requiredRole: string) {
     }
     done();
   };
+}
+
+export async function preventAlreadyAuthenticated(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    await request.jwtVerify();
+    throw new AuthAlreadyLoggedInError();
+  } catch (error) {
+    if (error instanceof AuthAlreadyLoggedInError) {
+      throw error;
+    }
+    return;
+
+  }
 }

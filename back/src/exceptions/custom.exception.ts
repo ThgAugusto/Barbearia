@@ -1,15 +1,29 @@
+import { ZodError } from "zod";
+import formatZodErrors from "../utils/zodErrorFormatter";
+
 export class CustomError extends Error {
   statusCode: number;
-  details?: any;  
+  msg: any;
 
-  constructor(message: string, statusCode: number, details?: any) {
-    super(message);
+  constructor(msg: any, statusCode: number) {
+    super(); 
+    this.msg = msg;
     this.statusCode = statusCode;
 
-    if (details) {
-      this.details = details;
-    }
-
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+
+  toString(): string {
+    if (this.msg && typeof this.msg === 'object') {
+      return JSON.stringify(this.msg);
+    }
+    return String(this.msg);
+  }
+}
+
+export class ValidationError extends CustomError {
+  constructor(error: ZodError) {
+    const formattedErrors = formatZodErrors(error);  
+    super(formattedErrors, 400);  
   }
 }

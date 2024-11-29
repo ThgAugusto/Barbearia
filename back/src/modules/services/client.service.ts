@@ -1,8 +1,9 @@
 import { AutoRegister, inject } from '../../utils/auto-register.decorator';
 import { ClientRepository } from '../repositories/client.repository';
 import { CreateClientDTO, UpdateClientDTO, ClientResponseDTO, ClientDTO } from '../dtos/client.dto';
-import { ClientNotFoundError, ClientValidationError, ClientEmailAlreadyExistsError } from '../../exceptions/client.exception';
+import { ClientNotFoundError, ClientEmailAlreadyExistsError } from '../../exceptions/client.exception';
 import { createClientSchema, updateClientSchema } from '../validations/client.validations';
+import { ValidationError } from '../../exceptions/custom.exception';
 
 @AutoRegister()
 export class ClientService {
@@ -13,7 +14,7 @@ export class ClientService {
   async create(clientData: CreateClientDTO): Promise<ClientResponseDTO> {
     const result = createClientSchema.safeParse(clientData);
     if (!result.success) {
-      throw new ClientValidationError(result.error);
+      throw new ValidationError(result.error);
     }
 
     const existingClient = await this.clientRepository.findByEmail(clientData.email);
@@ -42,7 +43,7 @@ export class ClientService {
   async update(id: number, clientData: UpdateClientDTO): Promise<ClientResponseDTO> {
     const result = updateClientSchema.safeParse(clientData);
     if (!result.success) {
-      throw new ClientValidationError(result.error);
+      throw new ValidationError(result.error);
     }
 
     const existingClient = await this.clientRepository.findById(id);

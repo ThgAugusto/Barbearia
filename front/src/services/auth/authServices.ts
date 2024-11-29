@@ -3,7 +3,7 @@ import ConnectionAPI from "../api/connectionAPI";
 function AuthServices() {
 
     const authenticate = async (email: string, password: string) => {
-        const response = await ConnectionAPI.post('auth', {email, password,});
+        const response = await ConnectionAPI.post('auth', { email, password, }, );
         return response.data;
     }
 
@@ -12,7 +12,7 @@ function AuthServices() {
         return response.data;
     }
 
-    return { authenticate, verifyAuth };
+    return { authenticate, verifyAuth};
 }
 
 export default AuthServices;

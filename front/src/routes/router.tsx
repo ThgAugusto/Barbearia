@@ -1,51 +1,50 @@
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 import Dashboard from "../pages/dashboard";
-import ClientList from '../pages/dashboard/content/ClientList';
-import SchedulingCalendar from "../pages/dashboard/content/SchedulingCalendar";
-import ServiceList from "../pages/dashboard/content/ServiceList";
-import Overview from "../pages/dashboard/content/Overview";
-import Login from "../pages/auth/login";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ClientList from '../pages/dashboard/content/client/ClientList';
+import SchedulingCalendar from "../pages/dashboard/scheduling/SchedulingCalendar";
+import ServiceList from "../pages/dashboard/treatment/ServiceList";
+import Overview from "../pages/dashboard/content/overview/Overview";
+import SingIn from "../pages/auth/singIn";
+import { ProtectedRoute } from "../components/ProtectedRoute";
+import { AuthProvider } from "../context/AuthProvider";
+import BarbershopContent from "../pages/dashboard/content/barbershop";
+import { DashboardProvider } from "../context/DashboardProvider";
 
-
-
-export const Router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     loader: () => redirect("/dashboard"),
   },
   {
-    path: "/login",
-    element: <Login />,
+    path: "/singIn",
+    element: <SingIn />,
   },
   {
-    path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
+    path: "/",
+    element: <ProtectedRoute redirectTo="/singIn" />,
     children: [
       {
-        path: "overview",
-        element: <Overview />,
+        path: "dashboard",
+        element: (
+          <DashboardProvider>
+            <Dashboard />
+          </DashboardProvider>
+        ),
+        children: [
+          { path: "overview", element: <Overview /> },
+          { path: "scheduling", element: <SchedulingCalendar /> },
+          { path: "services", element: <ServiceList /> },
+          { path: "clients", element: <ClientList /> },
+          { path: "history", element: <ClientList /> },
+          { path: 'barbershop', element: <BarbershopContent /> }
+        ],
       },
-      {
-        path: "scheduling",
-        element: <SchedulingCalendar />,
-      },
-      {
-        path: "services",
-        element: <ServiceList />,
-      },
-      {
-        path: "clients",
-        element: <ClientList />,
-      },
-      {
-        path: "history",
-        element: <ClientList />,
-      },
-    ]
-  }
+    ],
+  },
 ]);
+
+export const Router = () => (
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
+);

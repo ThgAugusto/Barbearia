@@ -1,16 +1,24 @@
 import { ZodError } from 'zod';
 import { CustomError } from './custom.exception';
 
-export class AuthValidationError extends CustomError {
-    constructor(error: ZodError) {
-        const message = 'Erro de validação de autenticação';
-        super(message, 400, error.flatten().fieldErrors);  
+
+export class IncorrectPasswordError extends CustomError {
+    constructor() {
+        const message = {
+            password: 'Senha inválida. Verifique e tente novamente.'
+        };
+        super(message, 401);
     }
 }
 
-export class IncorrectPasswordError extends CustomError {
-    constructor(message: string, details?: any) {
-        super(message, 401, details);  
+
+export class AuthEmailNotFoundError extends CustomError {
+    constructor() {
+        const message = {
+            email: 'O email não está associado a nenhuma conta.'
+        
+        };
+        super(message, 404);
     }
 }
 
@@ -31,6 +39,12 @@ export class AuthInvalidCredentialsError extends CustomError {
 export class AuthUnauthorizedError extends CustomError {
     constructor() {
         const message = 'Você não tem permissão para realizar esta ação.';
-        super(message, 403); 
+        super(message, 403);
+    }
+}
+
+export class AuthAlreadyLoggedInError extends CustomError {
+    constructor(message: string = 'Usuário já está logado.') {
+        super(message, 400);
     }
 }

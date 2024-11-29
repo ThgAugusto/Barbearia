@@ -16,6 +16,15 @@ export class UserRepository {
     return await prisma.user.findMany();
   }
 
+  async findAllBarbersByBarbershopId(barbershopId: number): Promise<User[]> {
+    return await prisma.user.findMany({
+      where: {
+        role: 'BARBER',
+        barbershopId
+      },
+    });
+  }
+  
   async findByEmail(email: string): Promise<User | null> {
     return prisma.user.findUnique({
       where: { email },
@@ -35,10 +44,17 @@ export class UserRepository {
     });
   }
 
-  async softDelete(id: number): Promise<void> {
-    await prisma.user.update({
+  async softDelete(id: number): Promise<User> {
+    return await prisma.user.update({
       where: { id },
       data: { status: 'INACTIVE' }, 
+    });
+  }
+
+  async restore(id: number): Promise<User> {
+    return await prisma.user.update({
+      where: { id },
+      data: { status: 'ACTIVE' }, 
     });
   }
 

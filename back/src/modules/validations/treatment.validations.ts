@@ -21,7 +21,7 @@ export const treatmentSchema = z.object({
     .positive({ message: 'A duração deve ser maior que zero.' }),
 
     barbershopId: z.number()
-    .int({ message: 'O indentificador de barbearia deve ser um número inteiro válido.' })
+    .int({ message: 'O identificador de barbearia deve ser um número inteiro válido.' })
     .refine(value => value > 0, { message: 'O identificador de barbearia deve ser um número maior que zero.' }),
 
 }).strict({ message: 'Somente os campos: name, description, price, duration e status são permitidos. Campos extras não são aceitos.' });

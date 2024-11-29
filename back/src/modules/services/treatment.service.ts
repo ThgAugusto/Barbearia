@@ -1,10 +1,11 @@
 import { AutoRegister, inject } from '../../utils/auto-register.decorator';
 import { TreatmentRepository } from '../repositories/treatment.repository';
 import { CreateTreatmentDTO, UpdateTreatmentDTO, TreatmentResponseDTO, TreatmentDTO } from '../dtos/treatment.dto';
-import { TreatmentNotFoundError, TreatmentValidationError } from '../../exceptions/treatment.exceptions';
+import { TreatmentNotFoundError } from '../../exceptions/treatment.exceptions';
 import { createTreatmentSchema, updateTreatmentSchema } from '../validations/treatment.validations';
 import { BarbershopService } from './barbershop.service';
 import { AuthUnauthorizedError } from '../../exceptions/auth.exception';
+import { ValidationError } from '../../exceptions/custom.exception';
 
 @AutoRegister()
 export class TreatmentService {
@@ -16,7 +17,7 @@ export class TreatmentService {
   async create(treatmentData: CreateTreatmentDTO, userId: number): Promise<TreatmentResponseDTO> {
     const result = createTreatmentSchema.safeParse(treatmentData);
     if (!result.success) {
-      throw new TreatmentValidationError(result.error);
+      throw new ValidationError(result.error);
     }
 
     const foundBarbershop = await this.barbershopService.findById(treatmentData.barbershopId);
@@ -46,7 +47,7 @@ export class TreatmentService {
   async update(id: number, treatmentData: UpdateTreatmentDTO, userId: number): Promise<TreatmentResponseDTO> {
     const result = updateTreatmentSchema.safeParse(treatmentData);
     if (!result.success) {
-      throw new TreatmentValidationError(result.error);
+      throw new ValidationError(result.error);
     }
     
     const existingTreatment = await this.treatmentRepository.findById(id);
@@ -54,10 +55,6 @@ export class TreatmentService {
       throw new TreatmentNotFoundError();
     }
 
-    const foundBarbershop = await this.barbershopService.findById(existingTreatment.barbershopId);
-    if (foundBarbershop && foundBarbershop.ownerId !== userId) {
-      throw new AuthUnauthorizedError();
-    }
 
     const updatedTreatment = await this.treatmentRepository.update(id, treatmentData);
     return new TreatmentDTO(updatedTreatment).toResponse();

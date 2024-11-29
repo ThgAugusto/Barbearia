@@ -17,7 +17,6 @@ const ServiceList = () => {
       duration: 20,
       description: 'Acabamento com navalha',
     },
-    // Add more services as needed
   ];
 
   return (

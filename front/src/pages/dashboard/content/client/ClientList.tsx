@@ -10,7 +10,6 @@ const ClientList = () => {
       lastVisit: '2024-03-10',
       totalVisits: 8,
     },
-    // Add more mock data as needed
   ];
 
   return (

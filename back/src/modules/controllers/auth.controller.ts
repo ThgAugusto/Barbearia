@@ -10,7 +10,7 @@ export class AuthController {
 
     async authenticate(request: FastifyRequest<{ Body: AuthDTO }>, reply: FastifyReply): Promise<void> {
         const token = await this.authService.authenticate(request.body, reply);
-        reply.status(200).send({ token });
+        reply.status(200).send({ success: true, token});
     }
 
 }

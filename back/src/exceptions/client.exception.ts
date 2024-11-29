@@ -15,9 +15,3 @@ export class ClientNotFoundError extends CustomError {
     }
 }
 
-export class ClientValidationError extends CustomError {
-    constructor(error: ZodError) {
-        const message = 'Erro de validação dos dados do cliente.';
-        super(message, 400, error.format());
-    }
-}

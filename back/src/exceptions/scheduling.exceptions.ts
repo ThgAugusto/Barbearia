@@ -15,12 +15,6 @@ export class SchedulingNotFoundError extends CustomError {
     }
 }
 
-export class SchedulingValidationError extends CustomError {
-    constructor(error: ZodError) {
-        const message = 'Erro de validação de agendamento';
-        super(message, 400, error.format());
-    }
-}
 
 export class SchedulingConflictError extends CustomError {
     constructor() {

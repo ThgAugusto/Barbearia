@@ -2,9 +2,11 @@ import argon2 from 'argon2';
 import { AutoRegister, inject } from '../../utils/auto-register.decorator';
 import { UserRepository } from '../repositories/user.repository';
 import { UserDTO, CreateUserDTO, UpdateUserDTO, UserResponseDTO } from '../dtos/user.dto';
-import { UserAlreadyExistsError, UserNotFoundError, UserValidationError } from '../../exceptions/user.exceptions';
+import { BarberWithoutBarbershopIdError, UserAlreadyExistsError, UserNotFoundError } from '../../exceptions/user.exceptions';
 import { createUserSchema, updateUserSchema } from '../validations/user.validations';
 import { BarbershopService } from './barbershop.service';
+import { ValidationError } from '../../exceptions/custom.exception';
+import { AuthUnauthorizedError } from '../../exceptions/auth.exception';
 
 @AutoRegister()
 export class UserService {
@@ -13,23 +15,46 @@ export class UserService {
     @inject(BarbershopService) private readonly barbershopService: BarbershopService
   ) { }
 
-  async create(userData: CreateUserDTO): Promise<UserResponseDTO> {
+  private async ComumCreate(userData: CreateUserDTO): Promise<string> {
     const result = createUserSchema.safeParse(userData);
     if (!result.success) {
-      throw new UserValidationError(result.error);
+      throw new ValidationError(result.error);
     }
-
-    if (userData.barbershopId) {
-      await this.barbershopService.findById(userData.barbershopId);
-    }
-
+  
     const existingUser = await this.userRepository.findByEmail(userData.email);
     if (existingUser) {
       throw new UserAlreadyExistsError();
     }
-
+  
     const hashedPassword = await argon2.hash(userData.password);
-
+    return hashedPassword; 
+  }
+  
+  async createBarber(userData: CreateUserDTO, userId: number): Promise<UserResponseDTO> {
+    userData.role = 'BARBER';
+    if (!userData.barbershopId) {
+      throw new BarberWithoutBarbershopIdError();
+    }
+  
+    const response = await this.barbershopService.findById(userData.barbershopId);
+    if (response.ownerId !== userId) {
+      throw new AuthUnauthorizedError();
+    }
+  
+    const hashedPassword = await this.ComumCreate(userData);
+  
+    const createdUser = await this.userRepository.create({
+      ...userData,
+      password: hashedPassword
+    });
+  
+    return new UserDTO(createdUser).toResponse();
+  }
+  
+  async createOwner(userData: CreateUserDTO): Promise<UserResponseDTO> {
+    userData.role = 'OWNER';
+    const hashedPassword = await this.ComumCreate(userData);
+  
     const createdUser = await this.userRepository.create({
       ...userData,
       password: hashedPassword
@@ -44,27 +69,32 @@ export class UserService {
       throw new UserNotFoundError();
     }
 
-    return new UserDTO(user).toResponse(); 
-  }
-
-  async findAuthUserByEmail(email: string): Promise<UserDTO> {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new UserNotFoundError();
-    }
-    return new UserDTO(user); 
+    return new UserDTO(user).toResponse();
   }
 
   async findAll(): Promise<UserResponseDTO[]> {
     const users = await this.userRepository.findAll();
-   
+
     return users.map(user => new UserDTO(user).toResponse());
   }
+
+  async findAllBarbersByBarbershopId(barbershopId: number, userId?: number): Promise<UserResponseDTO[]> {
+    const response = await this.barbershopService.findById(barbershopId);
+
+    if (response.ownerId !== userId) {
+      throw new AuthUnauthorizedError();
+    }
+
+
+    const barbers = await this.userRepository.findAllBarbersByBarbershopId(barbershopId);
+    return barbers.map(user => new UserDTO(user).toResponse());
+  }
+
 
   async update(id: number, userData: UpdateUserDTO): Promise<UserResponseDTO> {
     const result = updateUserSchema.safeParse(userData);
     if (!result.success) {
-      throw new UserValidationError(result.error);
+      throw new ValidationError(result.error);
     }
 
     const existingUser = await this.userRepository.findById(id);
@@ -78,14 +108,26 @@ export class UserService {
 
     const updatedUser = await this.userRepository.update(id, userData);
 
-    return new UserDTO(updatedUser).toResponse(); 
+    return new UserDTO(updatedUser).toResponse();
   }
 
-  async softDelete(id: number): Promise<void> {
+  async softDelete(id: number): Promise<UserResponseDTO> {
     const existingUser = await this.userRepository.findById(id);
     if (!existingUser || existingUser.status === "INACTIVE") {
       throw new UserNotFoundError();
     }
-    await this.userRepository.softDelete(id);
+    const inactiveUser = await this.userRepository.softDelete(id);
+    return new UserDTO(inactiveUser).toResponse();
+  }
+
+  async restore(id: number): Promise<UserResponseDTO> {
+    const existingUser = await this.userRepository.findById(id);
+    if (!existingUser || existingUser.status === "ACTIVE") {
+      throw new UserNotFoundError();
+    }
+    
+    const restoredUser = await this.userRepository.restore(id);
+    
+    return new UserDTO(restoredUser).toResponse();
   }
 }

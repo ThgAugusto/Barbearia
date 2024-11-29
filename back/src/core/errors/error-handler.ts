@@ -5,9 +5,8 @@ export class ErrorHandler {
     static handleError(error: Error, reply: FastifyReply): void {
         if (error instanceof CustomError) {
             reply.status(error.statusCode).send({
-                message: error.message,
-                ...(error.details && { error: error.details })
-            });
+                message: error.msg
+              });
         } else if (error instanceof Error) {
             reply.status(500).send({
                 message: 'Erro interno ao processar sua solicitação',

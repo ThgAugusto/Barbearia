@@ -16,9 +16,3 @@ export class BarbershopNotFoundError extends CustomError {
 }
 
 
-export class BarbershopValidationError extends CustomError {
-    constructor(error: ZodError) {
-        const message = 'Erro de validação de barbearia';
-        super(message, 400, error.format()) ;
-    }
-}

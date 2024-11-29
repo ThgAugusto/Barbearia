@@ -22,8 +22,7 @@ export class BarbershopDTO {
     }
 
     toResponse() {
-        const { status, ...barbershopResponse} = this;  
-        return barbershopResponse;
+        return this;
     }
 }
 

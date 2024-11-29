@@ -15,9 +15,9 @@ export class UserNotFoundError extends CustomError {
     }
 }
 
-export class UserValidationError extends CustomError {
-    constructor(error: ZodError) {
-        const message = 'Erro de validação de usuário';
-        super(message, 400, error.flatten().fieldErrors);  
+export class BarberWithoutBarbershopIdError extends CustomError {
+    constructor() {
+        const message = 'Um barbeiro deve estar associado a uma barbearia. O campo "barbershopId" é obrigatório.';
+        super(message, 400);  
     }
 }

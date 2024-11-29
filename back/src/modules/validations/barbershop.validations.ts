@@ -22,11 +22,9 @@ export const barbershopSchema = z.object({
         .refine(value => typeof value === 'string', { message: 'O endereço deve ser um texto.' }),
 
     phoneNumber: z.string()
-        .length(14, { message: 'O número de telefone deve ter 14 caracteres no formato (XX) XXXXX-XXXX ou (XX) XXXX-XXXX.' })
-        .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, { message: 'O número de telefone fornecido é inválido. O formato esperado é (XX) XXXXX-XXXX ou (XX) XXXX-XXXX.' })
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/,{message: 'O número de telefone fornecido é inválido. O formato esperado é (XX) XXXX-XXXX ou (XX) XXXXX-XXXX.',})
         .refine(value => typeof value === 'string', { message: 'O telefone deve ser um texto.' }),
 
-    ownerId: z.number().int({ message: 'O ownerId deve ser um número inteiro.' }),
 }).strict({  message: 'Somente os campos: socialReason, tradeName, cnpj, address, phoneNumber e ownerId são permitidos. Campos extras não são aceitos.'});
 
 export const createBarbershopSchema = barbershopSchema;

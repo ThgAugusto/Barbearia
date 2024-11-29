@@ -13,10 +13,12 @@ export class BarbershopController {
         reply.status(201).send(createdBarbershop);
     }
 
-    async findAll(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-        const barbershops = await this.barbershopService.findAll();
+    async findAllByOwner(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+        const ownerId = request.auth.userId;
+        const barbershops = await this.barbershopService.findAllByOwner(ownerId);
         reply.status(200).send(barbershops);
     }
+    
 
     async findById(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
         const barbershop = await this.barbershopService.findById(Number(request.params.id));
@@ -29,7 +31,12 @@ export class BarbershopController {
     }
 
     async softDelete(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
-        await this.barbershopService.softDelete(Number(request.params.id));
-        reply.status(200).send({ message: 'Barbearia deletata com sucessso' });
+        const inactiveBarbershop = await this.barbershopService.softDelete(Number(request.params.id));
+        reply.status(200).send(inactiveBarbershop);
     }
+    
+    async restore(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
+        const activeBarbershop = await this.barbershopService.restore(Number(request.params.id));
+         reply.status(200).send(activeBarbershop);
+     }
 }

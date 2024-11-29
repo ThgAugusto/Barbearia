@@ -1,31 +1,17 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import AuthServices from '../services/auth/authService';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean | null>(null);
-  const authServices = AuthServices();
-  const navigate = useNavigate();
+interface ProtectedRouteProps {
+  redirectTo: string;
+}
 
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      const user = await authServices.verifyAuth();
-      setIsAuthenticated(user ? true : false);
-    };
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ redirectTo }) => {
+  const { isAuthenticated, loading } = useAuth();
 
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
-    return <div>Carregando...</div>;
+  if (loading) {
+    return <div>Carregando...</div>; 
   }
 
-  if (isAuthenticated) {
-    return <>{children}</>;
-  } else {
-    navigate('/login');
-    return null;
-  }
+  return isAuthenticated ? <Outlet /> : <Navigate to={redirectTo} replace />;
 };
-
-export default ProtectedRoute;

@@ -12,9 +12,11 @@ export class BarbershopRepository {
         });
     }
 
-    async findAll(): Promise<Barbershop[]> {
+    async findAllByOwner(ownerId: number): Promise<Barbershop[]> {
         return await prisma.barbershop.findMany({
-            where: { status: 'ACTIVE' },
+            where: {
+                ownerId,
+            },
         });
     }
 
@@ -37,11 +39,18 @@ export class BarbershopRepository {
         });
     }
 
-    async softDelete(id: number): Promise<void> {
-        await prisma.barbershop.update({
+    async softDelete(id: number): Promise<Barbershop> {
+       return await prisma.barbershop.update({
             where: { id },
             data: { status: 'INACTIVE' },
         });
     }
+
+    async restore(id: number): Promise<Barbershop> {
+        return await prisma.barbershop.update({
+          where: { id },
+          data: { status: 'ACTIVE' }, 
+        });
+      }
 
 }

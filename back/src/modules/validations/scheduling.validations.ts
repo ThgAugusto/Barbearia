@@ -13,23 +13,25 @@ export const schedulingSchema = z.object({
 
   barberId: z.number()
     .int({ message: 'O identificador do barbeiro deve ser um número inteiro válido.' })
-    .refine(value => value > 0, { message: 'O identificador do barbeiro deve ser maior que zero.' }),
+    .positive({ message: 'O identificador do barbeiro deve ser maior que zero.' }),
+
 
   barbershopId: z.number()
     .int({ message: 'O identificador da barbearia deve ser um número inteiro válido.' })
-    .refine(value => value > 0, { message: 'O identificador da barbearia deve ser maior que zero.' }),
+    .positive({ message: 'O identificador da barbearia deve ser maior que zero.' }),
 
   status: z.nativeEnum(SchedulingStatus, { message: 'Status inválido.' })
     .optional()
-    .default(SchedulingStatus.SCHEDULED),  
+    .default(SchedulingStatus.SCHEDULED),
 
   treatmentId: z.number()
     .int({ message: 'O identificador do tratamento deve ser um número inteiro válido.' })
-    .refine(value => value > 0, { message: 'O identificador do tratamento deve ser maior que zero.' }),
+    .positive({ message: 'O identificador do tratamento deve ser maior que zero.' }),
+
 
   clientId: z.number()
     .int({ message: 'O identificador do cliente deve ser um número inteiro válido.' })
-    .refine(value => value > 0, { message: 'O identificador do cliente deve ser maior que zero.' }),
+    .positive({ message: 'O identificador do cliente deve ser maior que zero.' }),
 }).strict({
   message: 'Somente os campos: dateTime, notes, barberId, barbershopId, status, treatmentId e clientId são permitidos. Campos extras não são aceitos.',
 });

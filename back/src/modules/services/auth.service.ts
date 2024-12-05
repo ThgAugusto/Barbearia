@@ -18,7 +18,6 @@ export class AuthService {
     async authenticate(auth: AuthDTO, reply: FastifyReply): Promise<string> {
    
         const result = authSchema.safeParse(auth);
-        
         if (!result.success) {
             throw new ValidationError(result.error);
         }
@@ -26,8 +25,8 @@ export class AuthService {
         const user = await this.findAuthUserByEmail(auth.email);
 
         const isPasswordValid = await argon2.verify(user.password, auth.password);
-
-
+        console.log('Password')
+        
         if (!isPasswordValid) {
             throw new IncorrectPasswordError();
         }

@@ -10,7 +10,10 @@ interface DashboardProviderProps {
 export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }) => {
     const [dashboardData, setDashboardData] = useState<DashboardData>({
         barbershops: [],
-        barber: [],
+        barbers: [],
+        clients: [],
+        treatments: [],
+        scheduling: []
     });
 
     return (

@@ -1,7 +1,7 @@
 import { AutoRegister, inject } from '../../utils/auto-register.decorator';
 import { TreatmentRepository } from '../repositories/treatment.repository';
 import { CreateTreatmentDTO, UpdateTreatmentDTO, TreatmentResponseDTO, TreatmentDTO } from '../dtos/treatment.dto';
-import { TreatmentNotFoundError } from '../../exceptions/treatment.exceptions';
+import { NoTreatmentsFoundError, TreatmentNotFoundError } from '../../exceptions/treatment.exceptions';
 import { createTreatmentSchema, updateTreatmentSchema } from '../validations/treatment.validations';
 import { BarbershopService } from './barbershop.service';
 import { AuthUnauthorizedError } from '../../exceptions/auth.exception';
@@ -22,7 +22,7 @@ export class TreatmentService {
 
     const foundBarbershop = await this.barbershopService.findById(treatmentData.barbershopId);
     if (foundBarbershop && foundBarbershop.ownerId !== userId) {
-        throw new AuthUnauthorizedError();
+      throw new AuthUnauthorizedError();
     }
 
     const createdTreatment = await this.treatmentRepository.create(treatmentData);
@@ -39,8 +39,25 @@ export class TreatmentService {
     return new TreatmentDTO(treatment).toResponse();
   }
 
+
+  async findAllByBarbershopId(id: number): Promise<TreatmentResponseDTO[]> {
+    const treatments = await this.treatmentRepository.findAllByBarbershopId(id);
+
+    if (!treatments || treatments.length === 0) {
+        throw new NoTreatmentsFoundError();
+    }
+
+    return treatments.map(treatment =>
+        new TreatmentDTO(treatment).toResponse()
+    );
+}
+
   async findAll(): Promise<TreatmentResponseDTO[]> {
     const treatments = await this.treatmentRepository.findAll();
+    if (!treatments) {
+      throw new TreatmentNotFoundError();
+    }
+    
     return treatments.map(treatment => new TreatmentDTO(treatment).toResponse());
   }
 
@@ -49,7 +66,7 @@ export class TreatmentService {
     if (!result.success) {
       throw new ValidationError(result.error);
     }
-    
+
     const existingTreatment = await this.treatmentRepository.findById(id);
     if (!existingTreatment) {
       throw new TreatmentNotFoundError();
@@ -60,12 +77,25 @@ export class TreatmentService {
     return new TreatmentDTO(updatedTreatment).toResponse();
   }
 
-  async softDelete(id: number): Promise<void> {
+  async softDelete(id: number): Promise<TreatmentResponseDTO> {
     const existingTreatment = await this.treatmentRepository.findById(id);
     if (!existingTreatment || existingTreatment.status === 'INACTIVE') {
       throw new TreatmentNotFoundError();
     }
 
-    await this.treatmentRepository.softDelete(id);
+   const inactiveTreatment =  await this.treatmentRepository.softDelete(id);
+   return new TreatmentDTO(inactiveTreatment).toResponse();
+  }
+
+
+  async restore(id: number): Promise<TreatmentResponseDTO> {
+    const existingTreatment = await this.treatmentRepository.findById(id);
+    if (!existingTreatment || existingTreatment.status === 'ACTIVE') {
+      throw new TreatmentNotFoundError();
+    }
+
+    const restoredTreatment = await this.treatmentRepository.restore(id);
+    return new TreatmentDTO(restoredTreatment).toResponse();
+
   }
 }

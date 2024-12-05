@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { decodeToken } from "../utils/jwtUtils";
-import AuthServices from "../services/auth/authServices";
+import AuthServices from "../services/authServices";
 import { AuthContextType, DecodedToken } from "../types/auth";
 
 

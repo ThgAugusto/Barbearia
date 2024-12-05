@@ -1,36 +1,46 @@
 import { FormikHelpers } from "formik";
 import React from "react";
+import { Barbershop } from "./barbershop";
+import { User, Create as CreateUser } from "./user";
 
 export interface Barber {
     id: number;
-    name: string;
-    email: string;
-    password: string;
     barbershopId: number;
-    status: "ACTIVE" | 'INACTIVE';
+    userId: number;
+    user: User;
+    barbershop: Barbershop
 }
 
-export type Create = Omit<Barber, 'id' | 'status'>;
-export type Update = Partial<Omit<Barber, 'id' | 'status'>>;
-export type Data = Omit<Barber, 'id' | 'status'> & { id?: number };
+export type Create = & { user: CreateUser } & { barbershopId: number };
+export type Data = CreateUser & { id?: number, barbershopId?: number }
+export type Update = { user?: Partial<CreateUser> } & { barbershopId?: number };;
+
+
+export type FormProps = {
+    values: Data;
+    create: (values: Data, formikHelpers: FormikHelpers<Data>) => Promise<void>;
+    update: (values: Partial<Data>, formikHelpers: FormikHelpers<Partial<Data>>) => Promise<void>;
+    barbershopsData: {
+        id: number;
+        socialReason: string;
+    }[];
+};
+
+export type ModalProps = FormProps & {
+    isModalOpen: boolean;
+    closeModal: () => void;
+};
+
+export type TableProps = {
+    barbersData: Barber[];
+    setValues: React.Dispatch<React.SetStateAction<Data>>;
+    openModal: () => void;
+    softDelete: (id: number) => Promise<void>;
+    restore: (id: number) => Promise<void>;
+};
 
 export interface BarberContentProps {
     openModalBarber: boolean;
     handleCloseBarberModal: () => void;
     barbershopId: number;
 }
-
-export type FormProps = {
-    values: Data;
-    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-    create: (values: Data, formikHelpers: FormikHelpers<Data>) => Promise<void>;
-    update: (values: Partial<Data>, formikHelpers: FormikHelpers<Partial<Data>>) => Promise<void>;
-};
-
-export type TableProps = {
-    barberData: Omit<Barber[], 'password'>;
-    setValues: React.Dispatch<React.SetStateAction<Data>>;
-    softDelete: (id: number) => Promise<void>;
-    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-    restore: (id: number) => Promise<void>;
-};

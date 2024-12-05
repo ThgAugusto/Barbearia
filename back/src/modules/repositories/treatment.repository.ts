@@ -12,7 +12,7 @@ export class TreatmentRepository {
         });
     }
 
-    async findAll(): Promise<Treatment[]> {
+    async findAll(): Promise<Treatment[] | null> {
         return await prisma.treatment.findMany({
             where: { status: 'ACTIVE' },
         });
@@ -23,10 +23,11 @@ export class TreatmentRepository {
             where: { id },
         });
     }
-
-    async findByName(name: string): Promise<Treatment | null> {
-        return prisma.treatment.findUnique({
-            where: { name },
+    async findAllByBarbershopId(barbershopId: number): Promise<Treatment[] | null> {
+        return prisma.treatment.findMany({
+            where: { 
+                barbershopId: barbershopId,  
+            },
         });
     }
 
@@ -37,10 +38,17 @@ export class TreatmentRepository {
         });
     }
 
-    async softDelete(id: number): Promise<void> {
-        await prisma.treatment.update({
+    async softDelete(id: number): Promise<Treatment> {
+        return await prisma.treatment.update({
             where: { id },
             data: { status: 'INACTIVE' },
+        });
+    }
+
+    async restore(id: number): Promise<Treatment>{
+        return await prisma.treatment.update({
+            where: { id },
+            data: { status: 'ACTIVE' },
         });
     }
 }

@@ -26,8 +26,14 @@ export class BarbershopDTO {
     }
 }
 
-export type CreateBarbershopDTO =  Omit<Barbershop, 'id' | 'status'> 
+export type CreateBarbershopDTO =  Omit<Barbershop, 'id' | 'status' | 'toResponse'> 
 
-export type UpdateBarbershopDTO =  Omit<Barbershop, 'id' | 'status'> 
+export type UpdateBarbershopDTO =  Omit<Barbershop, 'id' | 'status' |  'toResponse'> 
 
 export type BarbershopResponseDTO = ReturnType<BarbershopDTO['toResponse']>;
+
+export type BarbershopInfo = {
+        id: number;
+        socialReason: string;
+        cnpj: string;
+}

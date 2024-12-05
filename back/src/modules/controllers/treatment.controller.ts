@@ -13,6 +13,11 @@ export class TreatmentController {
         reply.status(201).send(createdTreatment);
     }
 
+    async findAllByBarbershopId(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
+        const treatments = await this.treatmentService.findAllByBarbershopId(Number(request.params.id));
+        reply.status(200).send(treatments);
+    }
+
     async findAll(request: FastifyRequest, reply: FastifyReply): Promise<void> {
         const treatments = await this.treatmentService.findAll();
         reply.status(200).send(treatments);
@@ -29,7 +34,12 @@ export class TreatmentController {
     }
 
     async softDelete(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
-        await this.treatmentService.softDelete(Number(request.params.id));
-        reply.status(200).send({ message: 'Tratamento deletado com sucesso' });
+       const inactiveTreatment = await this.treatmentService.softDelete(Number(request.params.id));
+        reply.status(200).send(inactiveTreatment);
+    }
+
+    async restore(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
+        const activeTreatment = await this.treatmentService.restore(Number(request.params.id));
+        reply.status(200).send(activeTreatment);
     }
 }

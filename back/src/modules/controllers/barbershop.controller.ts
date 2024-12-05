@@ -19,7 +19,6 @@ export class BarbershopController {
         reply.status(200).send(barbershops);
     }
     
-
     async findById(request: FastifyRequest<{ Params: { id: number } }>, reply: FastifyReply): Promise<void> {
         const barbershop = await this.barbershopService.findById(Number(request.params.id));
         reply.status(200).send(barbershop);

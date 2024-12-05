@@ -1,14 +1,15 @@
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 import Dashboard from "../pages/dashboard";
-import ClientList from '../pages/dashboard/content/client/ClientList';
-import SchedulingCalendar from "../pages/dashboard/scheduling/SchedulingCalendar";
-import ServiceList from "../pages/dashboard/treatment/ServiceList";
 import Overview from "../pages/dashboard/content/overview/Overview";
-import SingIn from "../pages/auth/singIn";
+import SingIn from "../pages/auth/signIn";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { AuthProvider } from "../context/AuthProvider";
 import BarbershopContent from "../pages/dashboard/content/barbershop";
 import { DashboardProvider } from "../context/DashboardProvider";
+import ClientContent from "../pages/dashboard/content/client";
+import SingUp from "../pages/auth/signUp";
+import BarberContent from "../pages/dashboard/content/barber";
+import SchedulingContent from "../pages/dashboard/content/scheduling";
 
 const router = createBrowserRouter([
   {
@@ -16,12 +17,16 @@ const router = createBrowserRouter([
     loader: () => redirect("/dashboard"),
   },
   {
-    path: "/singIn",
+    path: "/sign-in",
     element: <SingIn />,
   },
   {
+    path: "/sign-up",
+    element: <SingUp />,
+  },
+  {
     path: "/",
-    element: <ProtectedRoute redirectTo="/singIn" />,
+    element: <ProtectedRoute redirectTo="/sign-in" />,
     children: [
       {
         path: "dashboard",
@@ -31,11 +36,11 @@ const router = createBrowserRouter([
           </DashboardProvider>
         ),
         children: [
-          { path: "overview", element: <Overview /> },
-          { path: "scheduling", element: <SchedulingCalendar /> },
-          { path: "services", element: <ServiceList /> },
-          { path: "clients", element: <ClientList /> },
-          { path: "history", element: <ClientList /> },
+          { path: "", element: <Overview /> },
+          { path: "scheduling", element: <SchedulingContent /> },
+          { path: "barber", element: <BarberContent /> },
+          { path: "clients", element: <ClientContent /> },
+          { path: "history", element:  <></>},
           { path: 'barbershop', element: <BarbershopContent /> }
         ],
       },

@@ -1,7 +1,7 @@
 import { AutoRegister, inject } from '../../utils/auto-register.decorator';
 import { BarbershopRepository } from '../repositories/barbershop.repository';
 import { CreateBarbershopDTO, UpdateBarbershopDTO, BarbershopResponseDTO, BarbershopDTO } from '../dtos/barbershop.dto';
-import { BarbershopAlreadyExistsError, BarbershopNotFoundError } from '../../exceptions/barbershop.exeptions'
+import { BarbershopAlreadyExistsError, BarbershopNotFoundError, NoBarbershopFoundError } from '../../exceptions/barbershop.exeptions'
 import { createBarbershopSchema, updateBarbershopSchema } from '../validations/barbershop.validations';
 import { AuthUnauthorizedError } from '../../exceptions/auth.exception';
 import { ValidationError } from '../../exceptions/custom.exception';
@@ -19,7 +19,7 @@ export class BarbershopService {
     if (!userId) {
       throw new AuthUnauthorizedError();
     }
-    
+
     barbershopData.ownerId = userId;
 
     const existingBarbershop = await this.barbershopRepository.findByCnpj(barbershopData.cnpj);
@@ -42,6 +42,9 @@ export class BarbershopService {
 
   async findAllByOwner(ownerId: number): Promise<BarbershopResponseDTO[]> {
     const barbershops = await this.barbershopRepository.findAllByOwner(ownerId);
+    if (!barbershops || barbershops.length === 0) {
+      throw new NoBarbershopFoundError();
+    }
     return barbershops.map(barbershop => new BarbershopDTO(barbershop).toResponse());
   }
 
@@ -78,10 +81,10 @@ export class BarbershopService {
     if (!existingBarbershop || existingBarbershop.status === "ACTIVE") {
       throw new BarbershopNotFoundError();
     }
-    
+
     const restoredBarbershop = await this.barbershopRepository.restore(id);
-    
+
     return new BarbershopDTO(restoredBarbershop).toResponse();
   }
-  
+
 }

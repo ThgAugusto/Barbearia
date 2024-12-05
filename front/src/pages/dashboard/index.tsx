@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Calendar, Users, Scissors, Clock, LayoutDashboard, LayoutList, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Users, Scissors, Clock, LayoutDashboard, ChevronLeft, ChevronRight, LayoutList } from 'lucide-react';
 
 export default function Dashboard() {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard/overview', category: null },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', category: null },
     { icon: Scissors, label: 'Estabelecimentos', path: '/dashboard/barbershop', category: 'services' },
+    { icon: LayoutList, label: 'Barbeiros', path: '/dashboard/barber', category: 'services' },
     { icon: Calendar, label: 'Agendamentos', path: '/dashboard/scheduling', category: 'services' },
     { icon: Users, label: 'Clientes', path: '/dashboard/clients', category: 'clients' },
-    { icon: LayoutList, label: 'Serviços', path: '/dashboard/services', category: 'services' },
     { icon: Clock, label: 'Histórico', path: '/dashboard/history', category: 'history' },
   ] as const;
 

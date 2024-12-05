@@ -1,116 +1,127 @@
-import { useEffect, useCallback } from "react";
-import BarberService from "../../services/barber/barberService";
-import { useDashboard } from "../../context/DashboardProvider";
-import { AxiosError } from "axios";
+import { useCallback, useEffect } from "react";
 import { FormikHelpers } from "formik";
-import { Data } from "../../types/barber";
+import { useDashboard } from "../../context/DashboardProvider";
+import BarberService from "../../services/barberService";
+import { AxiosError } from "axios";
+import { Barber, Data } from "../../types/barber";
+import useBarbershops from "../barbershop/useBarbershop";
+import { useSetModalInUrl } from "../modal/useModelInUrl";
 
-const useBarber = (barbershopId: number) => {
+const useBarber = () => {
     const { dashboardData, setDashboardData } = useDashboard();
     const barberService = BarberService();
+    const { barbershopsData } = useBarbershops();
+    const {isModalOpen, openModal, closeModal} =useSetModalInUrl('Barber');
+
+    const updateBarbersData = (updatedBarber: Barber) => {
+        setDashboardData((prev) => ({
+            ...prev,
+            barbers: prev.barbers.map((item) =>
+                item.id === updatedBarber.id ? updatedBarber : item
+            ),
+        }));
+    };
 
     const fetchData = useCallback(async () => {
-        if (!dashboardData.barber[barbershopId]) {
-            const data = await barberService.findAllBarbersByBarbershopId(barbershopId);
-            setDashboardData((prev) => ({
-                ...prev,
-                barber: {
-                    ...prev.barber,
-                    [barbershopId]: data,
-                },
-            }));
+        if (dashboardData.barbers.length === 0) {
+            try {
+                const data = await barberService.findAllByOwnerId();
+                setDashboardData((prev) => ({
+                    ...prev,
+                    barbers: Array.isArray(data) ? data : [],
+                }));
+            } catch (error) {
+                console.error("Error fetching barbers:", error);
+            }
         }
-    }, [dashboardData, setDashboardData, barberService, barbershopId]);
+    }, [dashboardData.barbers.length, setDashboardData, barberService]);
 
     const create = async (barber: Data, formikHelpers: FormikHelpers<Data>) => {
-        const { setErrors } = formikHelpers;
         try {
-            const response = await barberService.create(barber);
+            const response = await barberService.create({
+                user: {
+                    name: barber.name,
+                    email: barber.email,
+                    password: barber.password,
+                    cpf: barber.cpf,
+                },
+                barbershopId: Number(barber.barbershopId),
+            });
             if (response) {
                 setDashboardData((prev) => ({
                     ...prev,
-                    barber: {
-                        ...prev.barber,
-                        [barbershopId]: [...(prev.barber[barbershopId] || []), response],
-                    },
+                    barbers: [...prev.barbers, response],
                 }));
+                closeModal()
             }
         } catch (error) {
-            handleError(error, setErrors);
+            handleError(error, formikHelpers.setErrors);
         }
     };
 
     const update = async (barber: Partial<Data>, formikHelpers: FormikHelpers<Partial<Data>>) => {
-        const { setErrors } = formikHelpers;
+        console.log(barber)
         try {
             if (!barber.id) {
                 throw new Error("Barber ID is required for updating");
             }
-            
-            const { id, ...barberDataWithoutId } = barber;
-            const response = await barberService.update(id, barberDataWithoutId);
-    
+            const response = await barberService.update(barber.id, {
+                user: {
+                    name: barber.name,
+                    email: barber.email,
+                    cpf: barber.cpf,
+                    password: barber.password
+                },
+                ...(barber.barbershopId && { barbershopId: Number(barber.barbershopId) })
+            });
+
             if (response) {
-                setDashboardData((prev) => ({
-                    ...prev,
-                    barber: {
-                        ...prev.barber,
-                        [response.barbershopId]: prev.barber[response.barbershopId].map((item) =>
-                            item.id === barber.id ? response : item
-                        ),
-                    },
-                }));
+                updateBarbersData(response);
+                closeModal()
             }
         } catch (error) {
-            handleError(error, setErrors);
+            handleError(error, formikHelpers.setErrors);
         }
     };
-    
+
     const softDelete = async (id: number) => {
-        const response = await barberService.softDelete(id);
-        setDashboardData((prev) => ({
-            ...prev,
-            barber: {
-                ...prev.barber,
-                [response.barbershopId]: prev.barber[response.barbershopId].map((item) =>
-                    item.id === id ? response : item
-                ),
-            },
-        }));
+        try {
+            const response = await barberService.softDelete(id);
+            updateBarbersData(response);
+        } catch (error) {
+            console.error("Error during soft delete:", error);
+        }
     };
 
     const restore = async (id: number) => {
-        const response = await barberService.restore(id);
-        setDashboardData((prev) => ({
-            ...prev,
-            barber: {
-                ...prev.barber,
-                [response.barbershopId]: prev.barber[response.barbershopId].map((item) =>
-                    item.id === id ? response : item
-                ),
-            },
-        }));
+        try {
+            const response = await barberService.restore(id);
+            updateBarbersData(response);
+        } catch (error) {
+            console.error("Error during restore:", error);
+        }
     };
 
-
-    const handleError = (error: unknown, setErrors: FormikHelpers<Data>['setErrors']) => {
+    const handleError = (error: unknown, setErrors: FormikHelpers<Data>["setErrors"]) => {
         if (error instanceof AxiosError) {
             setErrors(error.response?.data?.message);
         } else {
-            console.error('Erro inesperado:', error);
+            console.error("Unexpected error:", error);
         }
     };
 
     useEffect(() => {
         fetchData();
-    }, [barbershopId]);
+    }, []);
 
     return {
-        barberData: dashboardData.barber[barbershopId] || [],
+        barbersData: dashboardData.barbers || [],
+        barbershopsData: barbershopsData.map(({ id, socialReason }) => ({ id, socialReason })),
         create,
         update,
         softDelete,
-        restore
+        restore,
+        openModal, closeModal, isModalOpen
     };
 };
 

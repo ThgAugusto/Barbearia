@@ -5,58 +5,57 @@ import BarbershopModal from './components/Modal';
 import BarbershopTable from './components/Table';
 import { useState } from 'react';
 import { Data } from '../../../../types/barbershop';
-import BarberContent from '../barber';
+import TreatmentContent from '../treatment';
+import { useTreatmentModal } from '../../../../hooks/treatment/useTreatment';
 
 function BarbershopContent() {
-    const { barbershopData, update, create, softDelete, barbershopId, handleCloseBarberModal, handleOpenBarberModal, openModalBarber, restore } = useBarbershops();
-    const [openModal, setOpenModal] = useState(false);
+    const { barbershopsData, update, create, softDelete, restore, openModal, closeModal, isModalOpen } = useBarbershops();
+    const initialState: Data = { id: undefined, socialReason: "", tradeName: "", cnpj: "", address: "", phoneNumber: "" }
+    const [values, setValues] = useState<Data>(initialState);
+    const { openTreatmentModal, closeTreatmentModal, isModalOpenTreatment, barbershopId } = useTreatmentModal();
 
-    const [values, setValues] = useState<Data>({
-        id: undefined,
-        socialReason: "",
-        tradeName: "",
-        cnpj: "",
-        address: "",
-        phoneNumber: "",
-    });
 
     return (
         <>
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Estabelecimentos</h2>
-                    <Button type="submit" className="bg-cyan-900" onClick={() => setOpenModal(true)}>
-                        <Scissors className="w-4 h-4" /> Nova Barbearia
+                    <Button className="bg-cyan-900 rounded-3xl" onClick={() => { setValues(initialState); openModal() }}>
+                        <span className="flex items-center">
+                            <Scissors className="w-4 h-4 mr-2" /> Nova Barbearia
+                        </span>
                     </Button>
 
                 </div>
-                <div className="overflow-x-auto">
-                    <BarbershopTable
-                        barbershopData={barbershopData}
-                        setValues={setValues}
-                        setOpenModal={setOpenModal}
-                        softDelete={softDelete}
-                        handleOpenBarberModal={handleOpenBarberModal}
-                        restore={restore}
-                    />
-                </div>
+
+                <BarbershopTable
+                    barbershopsData={barbershopsData}
+                    setValues={setValues}
+                    openModal={openModal}
+                    softDelete={softDelete}
+                    openTreatmentModal={openTreatmentModal}
+                    restore={restore}
+                />
+
             </div>
             <BarbershopModal
-                openModal={openModal}
-                setOpenModal={setOpenModal}
+                isModalOpen={isModalOpen}
+                closeModal={closeModal}
                 values={values}
                 update={update}
                 create={create}
-
             />
 
+
             {barbershopId && (
-                <BarberContent
-                    openModalBarber={openModalBarber}
+                <TreatmentContent
                     barbershopId={barbershopId}
-                    handleCloseBarberModal={handleCloseBarberModal}
+                    isModalOpen={isModalOpenTreatment}
+                    closeModal={closeTreatmentModal}
                 />
             )}
+
+
 
         </>
     );

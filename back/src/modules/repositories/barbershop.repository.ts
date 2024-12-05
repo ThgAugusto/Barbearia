@@ -12,7 +12,7 @@ export class BarbershopRepository {
         });
     }
 
-    async findAllByOwner(ownerId: number): Promise<Barbershop[]> {
+    async findAllByOwner(ownerId: number): Promise<Barbershop[] | null> {
         return await prisma.barbershop.findMany({
             where: {
                 ownerId,

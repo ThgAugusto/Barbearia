@@ -14,3 +14,10 @@ export class TreatmentNotFoundError extends CustomError {
         super(message, 404);
     }
 }
+
+export class NoTreatmentsFoundError extends CustomError {
+    constructor() {
+        const message = 'Não foi possível encontrar nenhum serviço cadastrado.';
+        super(message, 404);
+    }
+}

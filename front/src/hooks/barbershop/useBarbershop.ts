@@ -1,91 +1,96 @@
-import { useEffect, useCallback, useState } from "react";
-import BarbershopService from "../../services/barbershop/barbershopService";
+import { useEffect, useCallback } from "react";
+import BarbershopService from "../../services/barbershopService";
 import { FormikHelpers } from "formik";
 import { useDashboard } from "../../context/DashboardProvider";
-import { Data } from "../../types/barbershop";
+import { Barbershop, Data } from "../../types/barbershop";
 import { AxiosError } from "axios";
-import { useSearchParams } from "react-router-dom";
+import { useSetModalInUrl } from "../modal/useModelInUrl";
 
-const useBarbershops = () => {
+const useBarbershop = () => {
     const { dashboardData, setDashboardData } = useDashboard();
     const barbershopService = BarbershopService();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [barbershopId, setBarbershopId] = useState<number | null>(null);
-    const [openModalBarber, setOpenModalBarber] = useState(false);
+    const {isModalOpen, openModal, closeModal} =useSetModalInUrl('Barbershop');
+
+    const updateBarbershopState = useCallback((newData: Barbershop[]) => {
+        setDashboardData(prev => ({
+            ...prev,
+            barbershops: newData,
+        }));
+    }, [setDashboardData]);
 
     const fetchData = useCallback(async () => {
-        if (dashboardData.barbershops.length === 0) {
-            const data = await barbershopService.findAllByOwner();
-            setDashboardData((prev) => ({
-                ...prev,
-                barbershops: data,
-            }));
+        if (!dashboardData.barbershops.length) {
+            try {
+                const data = await barbershopService.findAllByOwner();
+                updateBarbershopState(data);
+            } catch (error) {
+                console.error("Erro ao buscar barbearias:", error);
+            }
         }
-    }, [dashboardData.barbershops, setDashboardData, barbershopService]);
+    }, [dashboardData.barbershops.length, barbershopService, updateBarbershopState]);
 
-
+    
     const create = async (barbershop: Data, formikHelpers: FormikHelpers<Data>) => {
-        const { setErrors } = formikHelpers;
         try {
             const response = await barbershopService.create(barbershop);
             if (response) {
-                setDashboardData((prev) => ({
-                    ...prev,
-                    barbershops: [...prev.barbershops, response],
-                }));
+                updateBarbershopState([...dashboardData.barbershops, response]);
+                closeModal()
             }
         } catch (error) {
-            handleError(error, setErrors);
+            handleError(error, formikHelpers.setErrors);
         }
     };
 
-
     const update = async (barbershop: Partial<Data>, formikHelpers: FormikHelpers<Partial<Data>>) => {
-        const { setErrors } = formikHelpers;
         try {
             if (!barbershop.id) {
-                throw new Error("Barber ID is required for updating");
+                throw new Error("ID da barbearia é obrigatório para atualização.");
             }
             const { id, ...barberDataWithoutId } = barbershop;
             const response = await barbershopService.update(id, barberDataWithoutId);
             if (response) {
-                setDashboardData((prev) => ({
-                    ...prev,
-                    barbershops: prev.barbershops.map((item) =>
+                updateBarbershopState(
+                    dashboardData.barbershops.map(item =>
                         item.id === barbershop.id ? response : item
-                    ),
-                }));
+                    )
+                );
+                closeModal()
             }
         } catch (error) {
-            handleError(error, setErrors);
+            handleError(error, formikHelpers.setErrors);
         }
     };
 
-
     const softDelete = async (id: number) => {
-        const response = await barbershopService.softDelete(id);
-        if (response) {
-            setDashboardData((prev) => ({
-                ...prev,
-                barbershops: prev.barbershops.map((shop) =>
-                    shop.id === id ? { ...shop, ...response } : shop 
-                ),
-            }));
+        try {
+            const response = await barbershopService.softDelete(id);
+            if (response) {
+                updateBarbershopState(
+                    dashboardData.barbershops.map(shop =>
+                        shop.id === id ? { ...shop, ...response } : shop
+                    )
+                );
+            }
+        } catch (error) {
+            console.error("Erro ao excluir barbearia:", error);
         }
     };
 
     const restore = async (id: number) => {
-        const response = await barbershopService.restore(id);
-        if (response) {
-            setDashboardData((prev) => ({
-                ...prev,
-                barbershops: prev.barbershops.map((shop) =>
-                    shop.id === id ? { ...shop, ...response } : shop 
-                ),
-            }));
+        try {
+            const response = await barbershopService.restore(id);
+            if (response) {
+                updateBarbershopState(
+                    dashboardData.barbershops.map(shop =>
+                        shop.id === id ? { ...shop, ...response } : shop
+                    )
+                );
+            }
+        } catch (error) {
+            console.error("Erro ao restaurar barbearia:", error);
         }
     };
-
 
     const handleError = (error: unknown, setErrors: FormikHelpers<Data>['setErrors']) => {
         if (error instanceof AxiosError) {
@@ -95,46 +100,19 @@ const useBarbershops = () => {
         }
     };
 
+
+
     useEffect(() => {
         fetchData();
     }, []);
 
-
-    const handleOpenBarberModal = (shopId: number) => {
-        searchParams.set("barbershopId", String(shopId));
-        setSearchParams(searchParams, { replace: true });
-    };
-
-    const handleCloseBarberModal = () => {
-        setSearchParams((prevParams) => {
-            const newParams = new URLSearchParams(prevParams);
-            newParams.delete('barbershopId');
-            return newParams;
-        });
-    };
-
-    useEffect(() => {
-        const paramBarbershopId = searchParams.get("barbershopId");
-        if (paramBarbershopId && !isNaN(Number(paramBarbershopId))) {
-            setBarbershopId(Number(paramBarbershopId));
-            setOpenModalBarber(true)
-        } else {
-            setBarbershopId(null);
-            setOpenModalBarber(false)
-        }
-    }, [searchParams]);
-
     return {
-        barbershopData: dashboardData.barbershops,
-        update,
-        create,
-        softDelete,
-        barbershopId,
-        handleCloseBarberModal,
-        handleOpenBarberModal,
-        openModalBarber,
-        restore
+        barbershopsData: dashboardData.barbershops || [],
+        update, create, softDelete, restore,
+        isModalOpen, openModal, closeModal
     };
 };
 
-export default useBarbershops;
+export default useBarbershop;
+
+

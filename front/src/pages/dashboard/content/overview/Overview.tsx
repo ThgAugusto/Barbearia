@@ -1,4 +1,3 @@
-import AppointmentCalendar from '../../scheduling/SchedulingCalendar';
 
 export default function Overview() {
     return (
@@ -18,7 +17,6 @@ export default function Overview() {
                     <p className="text-3xl font-bold text-blue-600">R$ 4.850</p>
                 </div>
             </div>
-            <AppointmentCalendar />
         </div>
     )
 }

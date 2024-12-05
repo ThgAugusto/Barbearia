@@ -1,71 +1,76 @@
 import useBarber from '../../../../hooks/barber/useBarber';
-import { Button, Modal, } from "flowbite-react";
+import { Button, Select } from "flowbite-react";
 import BarberTable from './components/Table';
 import { useState } from 'react';
 import { Data } from '../../../../types/barber';
 import { Scissors } from 'lucide-react';
-import BarberForm from './components/Form';
-import { BarberContentProps } from '../../../../types/barber';
+import BarberModal from './components/Modal';
+
+function BarberContent() {
+    const { barbersData, barbershopsData, softDelete, create, update, restore, openModal, closeModal, isModalOpen } = useBarber();
+    const initialState: Data = { id: undefined, name: "", email: "", password: "", cpf: "", barbershopId: 0 };
+    const [values, setValues] = useState<Data>(initialState);
+    const [selectedBarbershopId, setSelectedBarbershopId] = useState<number | null>(null);
 
 
-function BarberContent({ openModalBarber, barbershopId, handleCloseBarberModal }: BarberContentProps) {
-    const { barberData, softDelete, create, update, restore } = useBarber(barbershopId);
-    const [showForm, setShowForm] = useState<boolean>(false);
-    const [values, setValues] = useState<Data>({
-        id: undefined,
-        name: "",
-        email: "",
-        password: "",
-        barbershopId: barbershopId,
-    });
+    const handleBarbershopChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedId = event.target.value === "all" ? null : parseInt(event.target.value);
+        setSelectedBarbershopId(selectedId);
+    };
+
+    const filteredBarbers = selectedBarbershopId
+        ? barbersData.filter(barber => barber.barbershopId === selectedBarbershopId)
+        : barbersData;
 
     return (
         <>
-            <Modal show={openModalBarber} size="4xl" popup onClose={() => handleCloseBarberModal()}>
-                <Modal.Header className="bg-cyan-900 rounded-t-lg px-3 py-4 shadow-md">
-                    <span className="text-xl font-medium text-white dark:text-white">
-                        Controle de Barbeiros da { }
-                    </span>
-                </Modal.Header>
-                <Modal.Body className="pt-6 bg-gray-100 min-h-[520px]">
-                    {!showForm ? (
+            <div className="flex flex-col justify-between bg-white rounded-lg shadow-lg p-6 pb-0">
+                <section>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-800">Barbeiros</h2>
+                        <div className='flex space-x-3'>
 
-                        <div className="bg-white rounded-lg shadow-lg p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">Barbeiros</h2>
-                                <Button size="sm" type="submit" className="bg-cyan-900"
-                                    onClick={() => setShowForm(true)}
-                                >
-                                    <Scissors className="w-4 h-4" /> Novo Barbeiro
-                                </Button>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <BarberTable
-                                    barberData={barberData}
-                                    setValues={setValues}
-                                    softDelete={softDelete}
-                                    setShowForm={setShowForm}
-                                    restore={restore}
-                                />
-                            </div>
+                            <Button className="bg-cyan-900 rounded-3xl"
+                                onClick={ () => { setValues(initialState); openModal()}}>
+                                <span className="flex items-center">
+                                    <Scissors className="w-4 h-4 mr-2" />Novo Barbeiro
+                                </span>
+                            </Button>
                         </div>
-                    ) : (
-                        <BarberForm
-                            create={create}
-                            update={update}
-                            values={values}
-                            setShowForm={setShowForm}
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <BarberTable
+                            barbersData={filteredBarbers}
+                            setValues={setValues}
+                            softDelete={softDelete}
+                            restore={restore}
+                            openModal={openModal}
                         />
-                    )
-                    }
+                    </div>
+                </section>
+                <div className='flex justify-end items-center py-6'>
+                    <Select sizing="sm" className="flex" onChange={handleBarbershopChange}>
+                        <option value="all">TODAS BARBEARIAS..</option>
+                        {barbershopsData.map((barbershop) => (
+                            <option key={barbershop.id} value={barbershop.id}>
+                                {barbershop.socialReason.toUpperCase()}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+            </div>
 
-                </Modal.Body>
-            </Modal>
-
+            <BarberModal
+                isModalOpen={isModalOpen}
+                closeModal={closeModal}
+                values={values}
+                create={create}
+                update={update}
+                barbershopsData={barbershopsData}
+            />
         </>
     );
 }
-
-
 
 export default BarberContent;

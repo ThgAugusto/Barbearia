@@ -1,13 +1,12 @@
-import { Barbershop, Client, Scheduling, SchedulingStatus, Treatment, User } from '@prisma/client';
+import { Barbershop, Client, Scheduling, SchedulingStatus, Treatment, User, Barber } from '@prisma/client';
 import { prisma } from '../../core/database/prisma.client';
 import { AutoRegister } from '../../utils/auto-register.decorator';
 import { CreateSchedulingDTO, UpdateSchedulingDTO } from '../dtos/scheduling.dto';
 
 @AutoRegister()
 export class SchedulingRepository {
-
   async create(schedulingData: CreateSchedulingDTO): Promise<Scheduling & {
-    barber: User;
+    barber: Barber & { user: User };
     client: Client;
     barbershop: Barbershop;
     treatment: Treatment;
@@ -15,7 +14,9 @@ export class SchedulingRepository {
     return await prisma.scheduling.create({
       data: schedulingData,
       include: {
-        barber: true,
+        barber: {
+          include: { user: true },
+        },
         client: true,
         barbershop: true,
         treatment: true,
@@ -24,14 +25,16 @@ export class SchedulingRepository {
   }
 
   async findAll(): Promise<(Scheduling & {
-    barber: User;
+    barber: Barber & { user: User };
     client: Client;
     barbershop: Barbershop;
     treatment: Treatment;
   })[]> {
     return await prisma.scheduling.findMany({
       include: {
-        barber: true,
+        barber: {
+          include: { user: true },
+        },
         client: true,
         barbershop: true,
         treatment: true,
@@ -40,7 +43,7 @@ export class SchedulingRepository {
   }
 
   async findById(id: number): Promise<Scheduling & {
-    barber: User;
+    barber: Barber & { user: User };
     client: Client;
     barbershop: Barbershop;
     treatment: Treatment;
@@ -48,7 +51,9 @@ export class SchedulingRepository {
     return prisma.scheduling.findUnique({
       where: { id },
       include: {
-        barber: true,
+        barber: {
+          include: { user: true },
+        },
         client: true,
         barbershop: true,
         treatment: true,
@@ -57,7 +62,7 @@ export class SchedulingRepository {
   }
 
   async findByClientId(clientId: number): Promise<(Scheduling & {
-    barber: User;
+    barber: Barber & { user: User };
     client: Client;
     barbershop: Barbershop;
     treatment: Treatment;
@@ -65,7 +70,9 @@ export class SchedulingRepository {
     return prisma.scheduling.findMany({
       where: { clientId },
       include: {
-        barber: true,
+        barber: {
+          include: { user: true },
+        },
         client: true,
         barbershop: true,
         treatment: true,
@@ -74,7 +81,7 @@ export class SchedulingRepository {
   }
 
   async update(id: number, schedulingData: Partial<UpdateSchedulingDTO>): Promise<Scheduling & {
-    barber: User;
+    barber: Barber & { user: User };
     client: Client;
     barbershop: Barbershop;
     treatment: Treatment;
@@ -83,7 +90,9 @@ export class SchedulingRepository {
       where: { id },
       data: schedulingData,
       include: {
-        barber: true,
+        barber: {
+          include: { user: true },
+        },
         client: true,
         barbershop: true,
         treatment: true,
@@ -91,21 +100,85 @@ export class SchedulingRepository {
     });
   }
 
-  async softDelete(id: number): Promise<void> {
-    await prisma.scheduling.update({
+  async softDelete(id: number): Promise<Scheduling & {
+    barber: Barber & { user: User };
+    client: Client;
+    barbershop: Barbershop;
+    treatment: Treatment;
+  }> {
+    return prisma.scheduling.update({
       where: { id },
       data: { status: SchedulingStatus.CANCELLED },
-    });
-  }
-
-  async findConflictingScheduling(schedulingData: CreateSchedulingDTO): Promise<Scheduling | null> {
-    return prisma.scheduling.findFirst({
-      where: {
-        barbershopId: schedulingData.barbershopId,
-        barberId: schedulingData.barberId,
-        dateTime: schedulingData.dateTime,
-        status: { not: 'CANCELLED' },
+      include: {
+        barber: {
+          include: { user: true },
+        },
+        client: true,
+        barbershop: true,
+        treatment: true,
       },
     });
   }
+
+
+  async markAsCompleted(id: number): Promise<Scheduling & {
+    barber: Barber & { user: User };
+    client: Client;
+    barbershop: Barbershop;
+    treatment: Treatment;
+  }> {
+    return prisma.scheduling.update({
+      where: { id },
+      data: { status: SchedulingStatus.COMPLETED },
+      include: {
+        barber: {
+          include: { user: true },
+        },
+        client: true,
+        barbershop: true,
+        treatment: true,
+      },
+    });
+  }
+
+
+  async findAllByOwner(ownerId: number): Promise<(Scheduling & {
+    barber: Barber & { user: User };
+    client: Client;
+    barbershop: Barbershop;
+    treatment: Treatment;
+  })[]> {
+    return prisma.scheduling.findMany({
+      where: {
+        barbershop: {
+          ownerId,
+        },
+      },
+      include: {
+        barber: {
+          include: {
+            user: true
+          },
+        },
+        client: true,
+        barbershop: true,
+        treatment: true,
+      },
+    });
+  }
+
+
+  async findSchedulesByBarber(barberId: number, start: Date, end: Date) {
+    return prisma.scheduling.findMany({
+      where: {
+        barberId,
+        startTime: { gte: start },
+        endTime: { lte: end },
+        status: { in: ['SCHEDULED', 'COMPLETED'] },
+      },
+      orderBy: { startTime: 'asc' },
+    });
+  }
+
+
 }

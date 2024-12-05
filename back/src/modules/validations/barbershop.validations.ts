@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { isValidCNPJ } from "../../utils/verify.documents";
 
 export const barbershopSchema = z.object({
     socialReason: z.string()
@@ -14,6 +15,7 @@ export const barbershopSchema = z.object({
     cnpj: z.string()
         .length(18, { message: 'O CNPJ deve ter 18 caracteres no formato XX.XXX.XXX/XXXX-XX.' })
         .regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/, { message: 'O CNPJ fornecido é inválido. O formato esperado é XX.XXX.XXX/XXXX-XX.' })
+        .refine(value => isValidCNPJ(value), { message: 'O CNPJ fornecido é inválido.' })
         .refine(value => typeof value === 'string', { message: 'O CNPJ deve ser um texto.' }),
 
     address: z.string()
@@ -22,10 +24,12 @@ export const barbershopSchema = z.object({
         .refine(value => typeof value === 'string', { message: 'O endereço deve ser um texto.' }),
 
     phoneNumber: z.string()
-    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/,{message: 'O número de telefone fornecido é inválido. O formato esperado é (XX) XXXX-XXXX ou (XX) XXXXX-XXXX.',})
+        .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, { message: 'O número de telefone fornecido é inválido. O formato esperado é (99) 9999-999 ou (99) 99999-9999.' })
         .refine(value => typeof value === 'string', { message: 'O telefone deve ser um texto.' }),
 
-}).strict({  message: 'Somente os campos: socialReason, tradeName, cnpj, address, phoneNumber e ownerId são permitidos. Campos extras não são aceitos.'});
+}).strict({
+    message: 'Somente os campos: socialReason, tradeName, cnpj, address, phoneNumber e ownerId são permitidos. Campos extras não são aceitos.'
+});
 
 export const createBarbershopSchema = barbershopSchema;
 export const updateBarbershopSchema = barbershopSchema.partial();

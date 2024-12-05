@@ -1,11 +1,16 @@
-import {Barbershop} from '../types/barbershop';
+import { Barbershop } from '../types/barbershop';
 import { Barber } from './barber';
+import { Client } from './client';
+import { Scheduling } from './scheduling';
+import { Treatment } from './treatment';
 
 export interface DashboardData {
     barbershops: Barbershop[];
-    barber: {
-        [key: number]: Barber[]; 
-    };
+    barbers: Barber[];
+    clients: Client[];
+    treatments: {[key: number]: Treatment[];};
+    scheduling: Scheduling[];
+
 }
 
 export interface DashboardContextType {

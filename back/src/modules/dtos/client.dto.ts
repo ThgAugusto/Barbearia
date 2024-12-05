@@ -1,4 +1,5 @@
 import { Client, Status } from '@prisma/client';
+import { BarbershopInfo } from './barbershop.dto';
 
 export class ClientDTO {
     id: number;
@@ -6,6 +7,7 @@ export class ClientDTO {
     phone: string;
     email: string
     notes: string | null;
+    barbershopId: number ;
     status: Status;
 
 
@@ -15,17 +17,20 @@ export class ClientDTO {
         this.phone = client.phone;
         this.email = client.email;
         this.notes = client.notes || null;
+        this.barbershopId = client.barbershopId;
         this.status = client.status;
     }
 
-    toResponse() {
-        const { status, ...clientResponse } = this;  
-        return clientResponse;
+    toResponse(barbershop?: BarbershopInfo) {
+        return {
+            ...this,
+            barbershop
+        }
     }
 }
 
-export type CreateClientDTO = Omit<ClientDTO, 'id' | 'status'>;
+export type CreateClientDTO = Omit<ClientDTO, 'id' | 'status' | 'toResponse'>;
 
-export type UpdateClientDTO = Partial<Omit<ClientDTO, 'id' | 'status'>>;
+export type UpdateClientDTO = Partial<Omit<ClientDTO, 'id' | 'status' |  'toResponse'>>;
 
-export type ClientResponseDTO =  ReturnType<ClientDTO['toResponse']>;
+export type ClientResponseDTO = ReturnType<ClientDTO['toResponse']>;

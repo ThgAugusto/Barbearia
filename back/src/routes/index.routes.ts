@@ -1,11 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { container } from 'tsyringe';
-import { UserRoutes } from './user.routes';
+import { BarberRoutes } from './barber.routes';
 import { AuthRoutes } from './auth.routes';
 import { BarbershopRoutes } from './barbershop.routes';
 import { TreatmentRoutes } from './treatment.routes';
 import { ClientRoutes } from './client.routes';
 import { SchedulingRoutes } from './scheduling.routes';
+import { OwnerRoutes } from './owner.routes';
 
 export class Routes {
   constructor(private fastify: FastifyInstance) {
@@ -14,8 +15,11 @@ export class Routes {
 
   public register() {
     try {
-      const userRoutes = container.resolve(UserRoutes);
-      userRoutes.register();
+      const ownerRoutes = container.resolve(OwnerRoutes);
+      ownerRoutes.register();
+
+      const barberRoutes = container.resolve(BarberRoutes);
+      barberRoutes.register();
 
       const authRoutes = container.resolve(AuthRoutes);
       authRoutes.register();

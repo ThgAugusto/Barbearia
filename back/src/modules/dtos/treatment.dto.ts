@@ -21,13 +21,12 @@ export class TreatmentDTO {
     }
 
     toResponse() {
-        const { status, ...treatmentResponse } = this;  
-        return treatmentResponse;
+        return this;
     }
 }
 
-export type CreateTreatmentDTO = Omit<TreatmentDTO, 'id' | 'status'>;
+export type CreateTreatmentDTO = Omit<TreatmentDTO, 'id' | 'status' |  'toResponse'>;
 
-export type UpdateTreatmentDTO = Partial<Omit<TreatmentDTO, 'id' | 'status' | 'barbershopId'>>;
+export type UpdateTreatmentDTO = Partial<Omit<TreatmentDTO, 'id' | 'status' | 'barbershopId' | 'toResponse'>>;
 
 export type TreatmentResponseDTO = ReturnType<TreatmentDTO['toResponse']>;

@@ -14,7 +14,6 @@ export type Create = Omit<Barbershop, 'id' | 'status'>;
 export type Update = Partial<Omit<Barbershop, 'id' | 'status'>>;
 export type Data = Omit<Barbershop, 'id' | 'status'> & { id?: number };
 
-
 export type FormProps = {
     values: Data;
     create: (values: Data, formikHelpers: FormikHelpers<Data>) => Promise<void>;
@@ -22,15 +21,15 @@ export type FormProps = {
 };
 
 export type ModalProps = FormProps & {
-    openModal: boolean;
-    setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+    isModalOpen: boolean;
+    closeModal: () => void;
 };
 
 export type TableProps = {
-    barbershopData: Barbershop[];
+    barbershopsData: Barbershop[];
     setValues: React.Dispatch<React.SetStateAction<Data>>;
-    setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+    openModal: () => void;
     softDelete: (id: number) => Promise<void>;
-    handleOpenBarberModal: (shopId: number) => void;
+    openTreatmentModal: (id: number) => void;
     restore: (id: number) => Promise<void>;
 };

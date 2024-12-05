@@ -1,12 +1,13 @@
 import { SchedulingStatus, Scheduling, } from '@prisma/client';
-import { UserResponseDTO } from './user.dto';
 import { ClientResponseDTO } from './client.dto';
 import { BarbershopResponseDTO } from './barbershop.dto';
 import { TreatmentResponseDTO } from './treatment.dto';
+import { BarberResponseDTO } from './barber.dto';
 
 export class SchedulingDTO {
     id: number;
-    dateTime: Date;
+    startTime: Date;
+    endTime: Date;
     notes: string | null;
     barberId: number;
     barbershopId: number;
@@ -16,7 +17,8 @@ export class SchedulingDTO {
 
     constructor(scheduling: Scheduling) {
         this.id = scheduling.id;
-        this.dateTime = scheduling.dateTime;
+        this.startTime = scheduling.startTime;
+        this.endTime = scheduling.endTime;
         this.notes = scheduling.notes;
         this.barberId = scheduling.barberId;
         this.barbershopId = scheduling.barbershopId;
@@ -26,14 +28,14 @@ export class SchedulingDTO {
     }
 
     toResponse(
-        barber: UserResponseDTO,
+        barber: BarberResponseDTO,
         client: ClientResponseDTO,
         barbershop: BarbershopResponseDTO,
         treatment: TreatmentResponseDTO
     ) {
-        const { barberId, barbershopId, treatmentId, clientId, ...schedulingWithoutIds } = this;
+       
         return {
-            ...schedulingWithoutIds,
+            ...this,
             barber,
             client,
             barbershop,
@@ -43,9 +45,9 @@ export class SchedulingDTO {
     
 }
 
-export type CreateSchedulingDTO = Omit<SchedulingDTO, 'id' | 'status'>
+export type CreateSchedulingDTO = Omit<SchedulingDTO, 'id' | 'status' |  'toResponse'>
 
-export type UpdateSchedulingDTO = Omit<SchedulingDTO, 'id'>
+export type UpdateSchedulingDTO = Omit<SchedulingDTO, 'id' | 'toResponse'>
 
 export type SchedulingResponseDTO = ReturnType<SchedulingDTO['toResponse']>;
 

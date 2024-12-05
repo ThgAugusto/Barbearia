@@ -24,19 +24,33 @@ enum SchedulingStatus {
 }
 
 model User {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(100)
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(255)
+  cpf      String @unique @db.VarChar(14)
+  role     Role
+  status   Status @default(ACTIVE)
+
+  owner  Owner[]
+  barber Barber[]
+}
+
+model Barber {
+  id           Int          @id @default(autoincrement())
+  userId       Int          @unique
+  user         User         @relation(fields: [userId], references: [id])
+  barbershopId Int
+  barbershop   Barbershop   @relation(fields: [barbershopId], references: [id])
+  scheduling   Scheduling[]
+}
+
+model Owner {
   id               Int          @id @default(autoincrement())
-  name             String       @db.VarChar(100)
-  email            String       @unique @db.VarChar(255)
-  password         String       @db.VarChar(255)
-  role             Role
-  barbershopId     Int?
-  barbershopBarber Barbershop?  @relation("BarbershopBarbers", fields: [barbershopId], references: [id])
-  barberScheduling Scheduling[]
-  ownedBarbershops Barbershop[] @relation("BarbershopOwner")
-
-  status Status @default(ACTIVE)
-
-  @@index([role])
+  userId           Int          @unique
+  user             User         @relation(fields: [userId], references: [id])
+  phoneNumber      String       @db.VarChar(15)
+  ownedBarbershops Barbershop[]
 }
 
 model Barbershop {
@@ -47,19 +61,17 @@ model Barbershop {
   address      String       @db.VarChar(255)
   phoneNumber  String       @db.VarChar(15)
   ownerId      Int
-  owner        User         @relation("BarbershopOwner", fields: [ownerId], references: [id])
-  barber       User[]       @relation("BarbershopBarbers")
+  owner        Owner        @relation(fields: [ownerId], references: [id])
+  barber       Barber[]     @relation()
   scheduling   Scheduling[]
   treatments   Treatment[]
+  client       Client[]
   status       Status       @default(ACTIVE)
-
-  @@index([socialReason])
-  @@index([tradeName])
 }
 
 model Treatment {
   id           Int          @id @default(autoincrement())
-  name         String       @unique @db.VarChar(100) 
+  name         String       @db.VarChar(100)
   price        Decimal      @db.Money
   duration     Int
   description  String?      @db.Text
@@ -70,29 +82,30 @@ model Treatment {
 }
 
 model Client {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(100)
-  phone       String       @db.VarChar(15)
-  email       String       @unique @db.VarChar(100)
-  notes       String?
-  schedulings Scheduling[]
-  status      Status       @default(ACTIVE)
+  id           Int          @id @default(autoincrement())
+  name         String       @db.VarChar(100)
+  phone        String       @db.VarChar(15)
+  email        String       @unique @db.VarChar(100)
+  notes        String?
+  barbershopId Int
+  barbershop   Barbershop   @relation(fields: [barbershopId], references: [id])
+  schedulings  Scheduling[]
+  status       Status       @default(ACTIVE)
 }
 
 model Scheduling {
   id           Int              @id @default(autoincrement())
-  dateTime     DateTime
+  startTime    DateTime 
+  endTime      DateTime         
   notes        String?          @db.Text
   barberId     Int
   barbershopId Int
   status       SchedulingStatus @default(SCHEDULED)
   barbershop   Barbershop       @relation(fields: [barbershopId], references: [id])
-  barber       User             @relation(fields: [barberId], references: [id])
+  barber       Barber           @relation(fields: [barberId], references: [id])
   treatmentId  Int
   treatment    Treatment        @relation(fields: [treatmentId], references: [id])
   clientId     Int
   client       Client           @relation(fields: [clientId], references: [id])
 
-  @@index([barberId, dateTime])
-  @@index([barbershopId, dateTime])
 }

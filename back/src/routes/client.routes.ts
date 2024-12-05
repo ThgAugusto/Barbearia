@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { ClientController } from '../modules/controllers/client.controller';
 import { CreateClientDTO, UpdateClientDTO } from '../modules/dtos/client.dto';
 import { AutoRegister, inject } from '../utils/auto-register.decorator';
-import { authenticate } from '../core/middlewares/auth.middlewares';
+import { authenticate, checkUserRole } from '../core/middlewares/auth.middlewares';
 
 @AutoRegister()
 export class ClientRoutes {
@@ -12,7 +12,7 @@ export class ClientRoutes {
     ) { }
 
     public register() {
-        const authMiddleware = [authenticate];
+        const authMiddleware = [authenticate, checkUserRole('OWNER')];
 
         this.fastify.post<{ Body: CreateClientDTO }>('/clients',
             { preHandler: authMiddleware },
@@ -24,6 +24,19 @@ export class ClientRoutes {
             { preHandler: authMiddleware },
             async (request, reply) => {
                 return this.clientController.findAll(request, reply);
+            });
+
+
+        this.fastify.get('/clients/owner',
+            { preHandler: authMiddleware },
+            async (request, reply) => {
+                return this.clientController.findAllByOwnerId(request, reply);
+            });
+
+        this.fastify.get<{ Params: { barbershopId: number } }>('/clients/barbershop/:barbershopId',
+            { preHandler: authMiddleware },
+            async (request, reply) => {
+                return this.clientController.findAllByBarbershopId(request, reply);
             });
 
         this.fastify.get<{ Params: { id: number } }>('/clients/:id',
@@ -42,6 +55,13 @@ export class ClientRoutes {
             { preHandler: authMiddleware },
             async (request, reply) => {
                 return this.clientController.softDelete(request, reply);
+            });
+
+
+        this.fastify.patch<{ Params: { id: number } }>('/clients/:id/restore',
+            { preHandler: authMiddleware },
+            async (request, reply) => {
+                return this.clientController.restore(request, reply);
             });
     }
 }

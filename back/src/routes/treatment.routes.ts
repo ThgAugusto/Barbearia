@@ -20,11 +20,19 @@ export class TreatmentRoutes {
                 return this.treatmentController.create(request, reply);
             });
 
+        this.fastify.get<{ Params: { id: number } }>('/treatments/barbershop/:id',
+            { preHandler: authMiddleware },
+            async (request, reply) => {
+                return this.treatmentController.findAllByBarbershopId(request, reply);
+            });
+
+
         this.fastify.get('/treatments',
             { preHandler: authMiddleware },
             async (request, reply) => {
                 return this.treatmentController.findAll(request, reply);
             });
+
 
         this.fastify.get<{ Params: { id: number } }>('/treatments/:id',
             { preHandler: authMiddleware },
@@ -43,5 +51,12 @@ export class TreatmentRoutes {
             async (request, reply) => {
                 return this.treatmentController.softDelete(request, reply);
             });
+
+        this.fastify.patch<{ Params: { id: number } }>('/treatments/:id/restore',
+            { preHandler: authMiddleware },
+            async (request, reply) => {
+                return this.treatmentController.restore(request, reply);
+            });
+
     }
 }

@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import formatZodErrors from "../utils/zodErrorFormatter";
+import formatZodErrors from "../utils/zod-error.formatter";
 
 export class CustomError extends Error {
   statusCode: number;
